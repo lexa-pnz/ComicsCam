@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     ImageButton btnVideo, btnGallery;
     VideoView videoView;
     TextView textView;
+    Button btnPush;
 
 
     @Override
@@ -47,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
         videoView = (VideoView) findViewById(R.id.videoView);
         textView = (TextView) findViewById(R.id.textView);
+        btnPush = (Button) findViewById(R.id.btnPush);
 
         permissionCheck();
     }
@@ -75,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        
+
         switch (requestCode) {
             case REQUEST_ID_READ_WRITE_PERMISSION: {
 

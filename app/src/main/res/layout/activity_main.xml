@@ -33,7 +33,7 @@
         android:layout_width="250dp"
         android:layout_height="250dp"
         android:layout_marginStart="60dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="100dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -46,5 +46,15 @@
         android:text="TextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnPush"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="60dp"
+        android:layout_marginTop="22dp"
+        android:text="PUSH"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/videoView" />
 
 </android.support.constraint.ConstraintLayout>
