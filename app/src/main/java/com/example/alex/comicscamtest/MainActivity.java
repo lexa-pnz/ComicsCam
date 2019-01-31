@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        //
+        
         switch (requestCode) {
             case REQUEST_ID_READ_WRITE_PERMISSION: {
 
