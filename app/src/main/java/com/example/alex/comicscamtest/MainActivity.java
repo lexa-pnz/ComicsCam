@@ -1,27 +1,25 @@
 package com.example.alex.comicscamtest;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -29,17 +27,24 @@ import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
     static final int REQUEST_VIDEO_CAPTURE = 1;
     private final int Pick_image = 1;
     private static final int REQUEST_ID_READ_WRITE_PERMISSION = 99;
+    private Uri uri;
+
+    private static final String TAG = "MyINFO";
+    private static final String baseURL = "http://comixify.ai/comixify/"; //Путь ?
+    private String pathToStoredVideo;
 
     ImageButton btnVideo, btnGallery;
     VideoView videoView;
     TextView textView;
-    Button btnPush;
+    Button btn_load;
 
 
     @Override
@@ -49,7 +54,8 @@ public class MainActivity extends AppCompatActivity {
 
         videoView = (VideoView) findViewById(R.id.videoView);
         textView = (TextView) findViewById(R.id.textView);
-        btnPush = (Button) findViewById(R.id.btnPush);
+        btn_load = (Button) findViewById(R.id.btnPush);
+
 
         permissionCheck();
     }
@@ -123,6 +129,19 @@ public class MainActivity extends AppCompatActivity {
                 videoPickerIntent.setType("video/*");
                 startActivityForResult(videoPickerIntent, Pick_image);
                 break;
+
+            case R.id.btnPush:
+                pathToStoredVideo = getRealPathFromURIPath(uri, MainActivity.this);
+                Log.d(TAG, "Recorded Video Path" + pathToStoredVideo);
+
+                try {
+                    uploadVideoToServer(pathToStoredVideo);
+                }
+                catch (Exception e){
+                    Toast.makeText(this, "Ошибка при загрузке", Toast.LENGTH_SHORT).show();
+                }
+
+                break;
         }
     }
 
@@ -140,10 +159,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         try {
-            Uri videoUri = intent.getData();
-            videoView.setVideoURI(videoUri);
+            uri = intent.getData();
+            videoView.setVideoURI(uri);
             videoView.requestFocus();
             videoView.start();
+
+            /*pathToStoredVideo = getRealPathFromURIPath(uri, MainActivity.this);
+            Log.d(TAG, "Recorded Video Path " + pathToStoredVideo);
+
+            uploadVideoToServer(pathToStoredVideo);*/
 
         }
         catch (Exception e){
@@ -153,4 +177,50 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    //Загрузка на сервер
+    private void uploadVideoToServer(String pathToVideoFile){
+
+        File videoFile = new File(pathToVideoFile);
+        RequestBody videoBody = RequestBody.create(MediaType.parse("video/*"), videoFile);
+        MultipartBody.Part vFile = MultipartBody.Part.createFormData("video", videoFile.getName(), videoBody);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(baseURL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        VideoInterface vInterface = retrofit.create(VideoInterface.class);
+        Call<ResultObject>  serverCom = vInterface.uploadVideoToServer(vFile); //ОШИБКА at $Proxy0.uploadVideoToServer(Unknown Source)
+
+        serverCom.enqueue(new Callback<ResultObject>() {
+            @Override
+            public void onResponse(Call<ResultObject> call, Response<ResultObject> response) {
+
+                ResultObject result = response.body();
+                if(!TextUtils.isEmpty(result.getComic())){
+                    Toast.makeText(MainActivity.this, "Comic " + result.getComic(), Toast.LENGTH_LONG).show();
+                    Log.d(TAG, "Comic " + result.getComic());
+                }
+                else if (!TextUtils.isEmpty(result.getStatus())){
+                    Toast.makeText(MainActivity.this, "Status " + result.getStatus(), Toast.LENGTH_LONG).show();
+                    Log.d(TAG, "Status " + result.getStatus());
+                }
+            }
+            @Override
+            public void onFailure(Call<ResultObject> call, Throwable t) {
+                Log.d(TAG, "Error message " + t.getMessage());
+            }
+        });
+    }
+
+    private String getRealPathFromURIPath(Uri contentURI, Activity activity) {
+        Cursor cursor = activity.getContentResolver().query(contentURI, null, null, null, null);
+        if (cursor == null) {
+            return contentURI.getPath();
+        } else {
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            return cursor.getString(idx);
+        }
+    }
 }
