@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -19,7 +21,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.iceteck.silicompressorr.SiliCompressor;
+
 import java.io.File;
+import java.net.URISyntaxException;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -36,15 +41,22 @@ public class MainActivity extends AppCompatActivity {
     private final int Pick_image = 1;
     private static final int REQUEST_ID_READ_WRITE_PERMISSION = 99;
     private Uri uri;
+    private String filePath;
+    private File f = null;
 
     private static final String TAG = "MyINFO";
+    private static final String TAG2 = "Compress";
+
     private static final String baseURL = "http://comixify.ai/comixify/"; //Путь ?
     private String pathToStoredVideo;
 
     ImageButton btnVideo, btnGallery;
     VideoView videoView;
     TextView textView;
-    Button btn_load;
+    Button btn_load, btnCompr;
+
+    public MainActivity() {
+    }
 
 
     @Override
@@ -55,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
         videoView = (VideoView) findViewById(R.id.videoView);
         textView = (TextView) findViewById(R.id.textView);
         btn_load = (Button) findViewById(R.id.btnPush);
+        btnCompr = (Button) findViewById(R.id.btnCompr);
 
 
         permissionCheck();
@@ -140,6 +153,12 @@ public class MainActivity extends AppCompatActivity {
                 catch (Exception e){
                     Toast.makeText(this, "Ошибка при загрузке", Toast.LENGTH_SHORT).show();
                 }
+                break;
+
+            case R.id.btnCompr:
+
+                f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + getPackageName() + "/media/videos");
+                new VideoCompressAsyncTask(this).execute(uri.toString(), f.getPath());
 
                 break;
         }
@@ -157,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    protected void onActivityResult(int requestCode, int resultCode, final Intent intent) {
         try {
             uri = intent.getData();
             videoView.setVideoURI(uri);
@@ -168,6 +187,9 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Recorded Video Path " + pathToStoredVideo);
 
             uploadVideoToServer(pathToStoredVideo);*/
+
+
+
 
         }
         catch (Exception e){
@@ -196,15 +218,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResultObject> call, Response<ResultObject> response) {
 
-                ResultObject result = response.body();
-                if(!TextUtils.isEmpty(result.getComic())){
-                    Toast.makeText(MainActivity.this, "Comic " + result.getComic(), Toast.LENGTH_LONG).show();
-                    Log.d(TAG, "Comic " + result.getComic());
+                try {
+                    ResultObject result = response.body();
+                    if(!TextUtils.isEmpty(result.getComic())){
+                        Toast.makeText(MainActivity.this, "Comic " + result.getComic(), Toast.LENGTH_LONG).show();
+                        Log.d(TAG, "Comic " + result.getComic());
+                    }
+                    else if (!TextUtils.isEmpty(result.getStatus())){
+                        Toast.makeText(MainActivity.this, "Status " + result.getStatus(), Toast.LENGTH_LONG).show();
+                        Log.d(TAG, "Status " + result.getStatus());
+                    }
                 }
-                else if (!TextUtils.isEmpty(result.getStatus())){
-                    Toast.makeText(MainActivity.this, "Status " + result.getStatus(), Toast.LENGTH_LONG).show();
-                    Log.d(TAG, "Status " + result.getStatus());
+                catch (Exception e){
+                    Toast.makeText(MainActivity.this, "Нет данных", Toast.LENGTH_SHORT).show();
                 }
+
             }
             @Override
             public void onFailure(Call<ResultObject> call, Throwable t) {
