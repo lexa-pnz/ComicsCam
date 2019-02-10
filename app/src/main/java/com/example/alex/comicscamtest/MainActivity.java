@@ -1,12 +1,9 @@
 package com.example.alex.comicscamtest;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
@@ -21,10 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
-import com.iceteck.silicompressorr.SiliCompressor;
-
 import java.io.File;
-import java.net.URISyntaxException;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -41,8 +35,8 @@ public class MainActivity extends AppCompatActivity {
     private final int Pick_image = 1;
     private static final int REQUEST_ID_READ_WRITE_PERMISSION = 99;
     private Uri uri;
-    private String filePath;
     private File f = null;
+    String selectedImagePath;
 
     private static final String TAG = "MyINFO";
     private static final String TAG2 = "Compress";
@@ -68,7 +62,11 @@ public class MainActivity extends AppCompatActivity {
         textView = (TextView) findViewById(R.id.textView);
         btn_load = (Button) findViewById(R.id.btnPush);
         btnCompr = (Button) findViewById(R.id.btnCompr);
+        btnGallery = (ImageButton) findViewById(R.id.btnGallery);
+        btnVideo = (ImageButton) findViewById(R.id.btnVideo);
 
+        //Permission permission = new Permission(MainActivity.this);
+        //permission.permissionCheck();
 
         permissionCheck();
     }
@@ -120,20 +118,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void buttonClick(View view) {
-        btnGallery = (ImageButton) findViewById(R.id.btnGallery);
-        btnVideo = (ImageButton) findViewById(R.id.btnVideo);
-
-
         switch (view.getId()) {
 
             case R.id.btnVideo:
 
                 dispatchTakeVideoIntent();
                 permissionCheck();
-
-                /*videoView.setVideoPath("/storage/emulated/0/DCIM/Camera/VID_20190105_213347.mp4");
-                videoView.requestFocus();
-                videoView.start();*/
                 break;
 
             case R.id.btnGallery:
@@ -144,11 +134,13 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case R.id.btnPush:
-                pathToStoredVideo = getRealPathFromURIPath(uri, MainActivity.this);
-                Log.d(TAG, "Recorded Video Path" + pathToStoredVideo);
+
+                RealPathFromURI realPathFromURI = new RealPathFromURI(MainActivity.this);
+                selectedImagePath = realPathFromURI.getRealPathFromURI(uri);
+                Log.d(TAG, "Recorded Video Path: " + selectedImagePath);
 
                 try {
-                    uploadVideoToServer(pathToStoredVideo);
+                    uploadVideoToServer(selectedImagePath);
                 }
                 catch (Exception e){
                     Toast.makeText(this, "Ошибка при загрузке", Toast.LENGTH_SHORT).show();
@@ -157,46 +149,56 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.btnCompr:
 
-                f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + getPackageName() + "/media/videos");
-                new VideoCompressAsyncTask(this).execute(uri.toString(), f.getPath());
+                // Директория сохранения сжатого файла
+                File direct = new File(Environment.getExternalStorageDirectory().getAbsolutePath()
+                        + "/ComicsCam");
+                if (!direct.exists()) direct.mkdirs();
 
+
+                //Сжатие файла
+                //Видео из instagram обрабатываются некорректно.
+                //( Меняют ориентацию экрана )
+                new VideoCompressAsyncTask(this).execute(selectedImagePath, direct.getPath());
                 break;
         }
     }
+
 
     // Не работает в стандартной камере LinageOS (есть звук, нет видео)
     private void dispatchTakeVideoIntent() {
         Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
 
         if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
-            takeVideoIntent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 5); //Лимит (В новой камере не работает)
-            takeVideoIntent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 0); //Качество (В новой камере не работает)
+            takeVideoIntent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 10); //Лимит (В новой камере не работает)
+            takeVideoIntent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1); //Качество (В новой камере не работает)
             startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE);
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, final Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+
         try {
+            RealPathFromURI realPathFromURI = new RealPathFromURI(MainActivity.this);
+
+            //Получение пути к файлу из URI (Добавить низкие API)
+            Uri selectedImageUri = intent.getData();
+            selectedImagePath = realPathFromURI.getRealPathFromURI(selectedImageUri);
+            Log.d(TAG2, "Путь файла " + selectedImagePath.toString());
+
+            // Запуск ImageView
             uri = intent.getData();
             videoView.setVideoURI(uri);
             videoView.requestFocus();
             videoView.start();
-
-            /*pathToStoredVideo = getRealPathFromURIPath(uri, MainActivity.this);
-            Log.d(TAG, "Recorded Video Path " + pathToStoredVideo);
-
-            uploadVideoToServer(pathToStoredVideo);*/
-
-
-
-
         }
         catch (Exception e){
             Toast toast = Toast.makeText(MainActivity.this, "Повторите выбор камеры/файла", Toast.LENGTH_SHORT);
             toast.show();
         }
     }
+
 
 
     //Загрузка на сервер
@@ -239,16 +241,5 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "Error message " + t.getMessage());
             }
         });
-    }
-
-    private String getRealPathFromURIPath(Uri contentURI, Activity activity) {
-        Cursor cursor = activity.getContentResolver().query(contentURI, null, null, null, null);
-        if (cursor == null) {
-            return contentURI.getPath();
-        } else {
-            cursor.moveToFirst();
-            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-            return cursor.getString(idx);
-        }
     }
 }

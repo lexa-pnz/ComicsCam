@@ -11,6 +11,7 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.util.Locale;
 
+
 class VideoCompressAsyncTask extends AsyncTask<String, String, String> {
 
     Context mContext;
@@ -21,13 +22,13 @@ class VideoCompressAsyncTask extends AsyncTask<String, String, String> {
     }
 
     //Вывод тоста о начале
-        /*@Override
+        @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Toast.makeText(mContext, "Компресия", Toast.LENGTH_SHORT).show();
-        }*/
+            Toast.makeText(mContext, "Компрессия", Toast.LENGTH_LONG).show();
+        }
 
-    //Работа в фоновом режиме (Компресия)
+    //Работа в фоновом режиме (Компрессия)
     @Override
     protected String doInBackground(String... paths) {
 
@@ -44,7 +45,7 @@ class VideoCompressAsyncTask extends AsyncTask<String, String, String> {
     }
 
     //Расчет размера файла и вывод инофрмции
-        /*@Override
+        @Override
         protected void onPostExecute(String compressedFilePath) {
             super.onPostExecute(compressedFilePath);
 
@@ -58,7 +59,7 @@ class VideoCompressAsyncTask extends AsyncTask<String, String, String> {
 
             String text = String.format(Locale.US, "%s\nName: %s\nSize: %s", "Успешное сжатие", imageFile.getName(), value);
 
-            Toast.makeText(mContext, text, Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, text, Toast.LENGTH_LONG).show();
             Log.i("Silicompressor", "Path: "+compressedFilePath);
-        }*/
+        }
 }
