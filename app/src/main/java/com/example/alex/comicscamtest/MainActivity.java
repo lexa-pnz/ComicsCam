@@ -38,10 +38,11 @@ public class MainActivity extends AppCompatActivity {
     private File f = null;
     String selectedImagePath;
 
-    private static final String TAG = "MyINFO";
+    private static final String TAG = "UpVideo";
     private static final String TAG2 = "Compress";
 
-    private static final String baseURL = "http://comixify.ai/comixify/"; //Путь ?
+    private static final String baseURL = "http://comixify.ai"; //Путь ?
+    //private static final String baseURL = "http://comixify.ai/comixify/"; //Путь ?
     private String pathToStoredVideo;
 
     ImageButton btnVideo, btnGallery;
@@ -187,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
             selectedImagePath = realPathFromURI.getRealPathFromURI(selectedImageUri);
             Log.d(TAG2, "Путь файла " + selectedImagePath.toString());
 
-            // Запуск ImageView
+            // Запуск VideoView
             uri = intent.getData();
             videoView.setVideoURI(uri);
             videoView.requestFocus();
@@ -214,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         VideoInterface vInterface = retrofit.create(VideoInterface.class);
-        Call<ResultObject>  serverCom = vInterface.uploadVideoToServer(vFile); //ОШИБКА at $Proxy0.uploadVideoToServer(Unknown Source)
+        Call<ResultObject>  serverCom = vInterface.uploadVideoToServer(vFile);
 
         serverCom.enqueue(new Callback<ResultObject>() {
             @Override
@@ -222,13 +223,14 @@ public class MainActivity extends AppCompatActivity {
 
                 try {
                     ResultObject result = response.body();
-                    if(!TextUtils.isEmpty(result.getComic())){
-                        Toast.makeText(MainActivity.this, "Comic " + result.getComic(), Toast.LENGTH_LONG).show();
-                        Log.d(TAG, "Comic " + result.getComic());
-                    }
-                    else if (!TextUtils.isEmpty(result.getStatus())){
+
+                    if (!TextUtils.isEmpty(result.getStatus())){
                         Toast.makeText(MainActivity.this, "Status " + result.getStatus(), Toast.LENGTH_LONG).show();
                         Log.d(TAG, "Status " + result.getStatus());
+                    }
+                    else if(!TextUtils.isEmpty(result.getComic())){
+                        Toast.makeText(MainActivity.this, "Comic " + result.getComic(), Toast.LENGTH_LONG).show();
+                        Log.d(TAG, "Comic " + result.getComic());
                     }
                 }
                 catch (Exception e){
@@ -238,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
             }
             @Override
             public void onFailure(Call<ResultObject> call, Throwable t) {
-                Log.d(TAG, "Error message " + t.getMessage());
+                Log.d(TAG, "Error message: " + t.getMessage());
             }
         });
     }
