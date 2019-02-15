@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -19,6 +20,7 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import java.io.File;
+import java.util.Objects;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -45,10 +47,10 @@ public class MainActivity extends AppCompatActivity {
     //private static final String baseURL = "http://comixify.ai/comixify/"; //Путь ?
     private String pathToStoredVideo;
 
-    ImageButton btnVideo, btnGallery;
+    ImageButton btnVideo, btnGallery, btn_load;
     VideoView videoView;
     TextView textView;
-    Button btn_load, btnCompr;
+    Button btnCompr;
 
     public MainActivity() {
     }
@@ -61,10 +63,16 @@ public class MainActivity extends AppCompatActivity {
 
         videoView = (VideoView) findViewById(R.id.videoView);
         textView = (TextView) findViewById(R.id.textView);
-        btn_load = (Button) findViewById(R.id.btnPush);
+        btn_load = (ImageButton) findViewById(R.id.imgBtnPush);
         btnCompr = (Button) findViewById(R.id.btnCompr);
         btnGallery = (ImageButton) findViewById(R.id.btnGallery);
         btnVideo = (ImageButton) findViewById(R.id.btnVideo);
+
+        //Полноэкранный режим
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        //Убрать ActionBar
+        Objects.requireNonNull(getSupportActionBar()).hide();
 
         //Permission permission = new Permission(MainActivity.this);
         //permission.permissionCheck();
@@ -122,19 +130,21 @@ public class MainActivity extends AppCompatActivity {
         switch (view.getId()) {
 
             case R.id.btnVideo:
+                btnVideo.setImageResource(R.drawable.camera_icon2);
 
                 dispatchTakeVideoIntent();
                 permissionCheck();
                 break;
 
             case R.id.btnGallery:
+                btnGallery.setImageResource(R.drawable.gallery_icon2);
 
                 Intent videoPickerIntent = new Intent(Intent.ACTION_PICK);
                 videoPickerIntent.setType("video/*");
                 startActivityForResult(videoPickerIntent, Pick_image);
                 break;
 
-            case R.id.btnPush:
+            case R.id.imgBtnPush:
 
                 RealPathFromURI realPathFromURI = new RealPathFromURI(MainActivity.this);
                 selectedImagePath = realPathFromURI.getRealPathFromURI(uri);
@@ -198,6 +208,9 @@ public class MainActivity extends AppCompatActivity {
             Toast toast = Toast.makeText(MainActivity.this, "Повторите выбор камеры/файла", Toast.LENGTH_SHORT);
             toast.show();
         }
+
+        btnGallery.setImageResource(R.drawable.gallery_icon);
+        btnVideo.setImageResource(R.drawable.camera_icon);
     }
 
 
