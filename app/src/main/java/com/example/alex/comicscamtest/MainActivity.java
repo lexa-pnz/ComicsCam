@@ -21,9 +21,11 @@ import android.widget.VideoView;
 
 import java.io.File;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -222,10 +224,19 @@ public class MainActivity extends AppCompatActivity {
         RequestBody videoBody = RequestBody.create(MediaType.parse("video/*"), videoFile);
         MultipartBody.Part vFile = MultipartBody.Part.createFormData("video", videoFile.getName(), videoBody);
 
+        OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
+                .connectTimeout(40, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .build();
+
         Retrofit retrofit = new Retrofit.Builder()
+                .client(okHttpClient)
                 .baseUrl(baseURL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
+
+
 
         VideoInterface vInterface = retrofit.create(VideoInterface.class);
         Call<ResultObject>  serverCom = vInterface.uploadVideoToServer(vFile);
@@ -235,6 +246,7 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<ResultObject> call, Response<ResultObject> response) {
 
                 try {
+                    Log.d(TAG, "try");
                     ResultObject result = response.body();
 
                     if (!TextUtils.isEmpty(result.getStatus())){
@@ -247,6 +259,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 catch (Exception e){
+                    Log.d(TAG, "Error message: " + "Нет данных!");
+                    Log.d(TAG, "ERROR " + e.getMessage());
+
                     Toast.makeText(MainActivity.this, "Нет данных", Toast.LENGTH_SHORT).show();
                 }
 
@@ -254,6 +269,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<ResultObject> call, Throwable t) {
                 Log.d(TAG, "Error message: " + t.getMessage());
+                Toast.makeText(MainActivity.this, "Error message: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

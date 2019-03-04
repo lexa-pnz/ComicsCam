@@ -61,5 +61,6 @@ class VideoCompressAsyncTask extends AsyncTask<String, String, String> {
 
             Toast.makeText(mContext, text, Toast.LENGTH_LONG).show();
             Log.i("Silicompressor", "Path: "+compressedFilePath);
+            Log.i("Silicompressor", text);
         }
 }
