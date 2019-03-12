@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
@@ -13,14 +14,26 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.DownloadListener;
+import com.koushikdutta.async.http.AsyncHttpClient;
+import com.koushikdutta.async.http.AsyncHttpPost;
+import com.koushikdutta.async.http.AsyncHttpResponse;
+import com.koushikdutta.async.http.body.MultipartFormDataBody;
+import com.squareup.picasso.Picasso;
+
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Objects;
+import org.json.*;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
@@ -41,6 +54,10 @@ public class MainActivity extends AppCompatActivity {
     private Uri uri;
     private File f = null;
     String selectedImagePath;
+
+    File file;
+    String dirPath, fileName;
+    int counterImg = 0;
 
     private static final String TAG = "UpVideo";
     private static final String TAG2 = "Compress";
@@ -63,6 +80,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        AndroidNetworking.initialize(getApplicationContext());
+        dirPath = Environment.getExternalStorageDirectory() + "/ComicsImage";
+
         videoView = (VideoView) findViewById(R.id.videoView);
         textView = (TextView) findViewById(R.id.textView);
         btn_load = (ImageButton) findViewById(R.id.imgBtnPush);
@@ -80,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
         //permission.permissionCheck();
 
         permissionCheck();
+
     }
 
     public void permissionCheck(){
@@ -215,62 +236,76 @@ public class MainActivity extends AppCompatActivity {
         btnVideo.setImageResource(R.drawable.camera_icon);
     }
 
-
-
-    //Загрузка на сервер
     private void uploadVideoToServer(String pathToVideoFile){
-
-        File videoFile = new File(pathToVideoFile);
-        RequestBody videoBody = RequestBody.create(MediaType.parse("video/*"), videoFile);
-        MultipartBody.Part vFile = MultipartBody.Part.createFormData("video", videoFile.getName(), videoBody);
-
-        OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
-                .connectTimeout(40, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS)
-                .writeTimeout(60, TimeUnit.SECONDS)
-                .build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .client(okHttpClient)
-                .baseUrl(baseURL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-
-
-        VideoInterface vInterface = retrofit.create(VideoInterface.class);
-        Call<ResultObject>  serverCom = vInterface.uploadVideoToServer(vFile);
-
-        serverCom.enqueue(new Callback<ResultObject>() {
+        AsyncHttpPost post = new AsyncHttpPost("http://comixify.ai/comixify/");
+        MultipartFormDataBody body = new MultipartFormDataBody();
+        body.addFilePart("file", new File(pathToVideoFile));
+        post.setBody(body);
+        AsyncHttpClient.getDefaultInstance().executeString(post, new AsyncHttpClient.StringCallback(){
             @Override
-            public void onResponse(Call<ResultObject> call, Response<ResultObject> response) {
+            public void onCompleted(Exception ex, AsyncHttpResponse source, String result) {
+                if (ex != null) {
+                    ex.printStackTrace();
+                    return;
+                }
+                Log.i("Response»»»»»","Server says: " + result);
 
+                JSONObject obj = null;
                 try {
-                    Log.d(TAG, "try");
-                    ResultObject result = response.body();
-
-                    if (!TextUtils.isEmpty(result.getStatus())){
-                        Toast.makeText(MainActivity.this, "Status " + result.getStatus(), Toast.LENGTH_LONG).show();
-                        Log.d(TAG, "Status " + result.getStatus());
-                    }
-                    else if(!TextUtils.isEmpty(result.getComic())){
-                        Toast.makeText(MainActivity.this, "Comic " + result.getComic(), Toast.LENGTH_LONG).show();
-                        Log.d(TAG, "Comic " + result.getComic());
-                    }
-                }
-                catch (Exception e){
-                    Log.d(TAG, "Error message: " + "Нет данных!");
-                    Log.d(TAG, "ERROR " + e.getMessage());
-
-                    Toast.makeText(MainActivity.this, "Нет данных", Toast.LENGTH_SHORT).show();
+                    obj = new JSONObject(result);
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
 
-            }
-            @Override
-            public void onFailure(Call<ResultObject> call, Throwable t) {
-                Log.d(TAG, "Error message: " + t.getMessage());
-                Toast.makeText(MainActivity.this, "Error message: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                String url = "";
+                try {
+                    url = obj.getString("comics");
+                    url = "http://comixify.ai" + url;
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                Log.i("URL»»»»»", url);
+                downloadImg(url);
             }
         });
+    }
+
+    private void downloadImg(String url){
+        counterImg = counterImg++;
+        fileName = "image"+ counterImg + ".jpeg";
+        file = new File(dirPath, fileName);
+
+        AndroidNetworking.download(url, dirPath, fileName)
+                .build()
+                .startDownload(new DownloadListener() {
+                    @Override
+                    public void onDownloadComplete() {
+
+                        Toast.makeText(MainActivity.this, "DownLoad Complete", Toast.LENGTH_SHORT).show();
+
+
+//                        Intent intent = new Intent();
+//                        intent.setAction(android.content.Intent.ACTION_VIEW);
+//                        Uri uri =Uri.parse("file://" + dirPath + "/" + fileName);
+//                        String type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+//                                MimeTypeMap.getFileExtensionFromUrl(uri.toString()));
+//                        intent.setDataAndType(uri, type == null ? "*/*" : type);
+//                        startActivity((Intent.createChooser(intent,
+//                                "Открыть с помощью")));
+
+//                        File file = ...;
+//                        final Intent intent = new Intent(Intent.ACTION_VIEW)//
+//                                .setDataAndType(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ?
+//                                                android.support.v4.content.FileProvider.getUriForFile(this,getPackageName() + ".provider", file) : Uri.fromFile(file),
+//                                        "image/*").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+
+                    }
+                });
     }
 }

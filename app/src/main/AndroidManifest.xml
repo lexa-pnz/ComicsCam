@@ -18,7 +18,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:ignore="GoogleAppIndexingWarning">
+        tools:ignore="GoogleAppIndexingWarning"
+        android:authorities="${applicationId}.provider">
         <meta-data
             android:name="com.google.android.actions"
             android:resource="@xml/view_with_background" />
