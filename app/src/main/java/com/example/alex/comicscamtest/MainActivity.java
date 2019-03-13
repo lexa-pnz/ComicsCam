@@ -17,6 +17,7 @@ import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -28,7 +29,7 @@ import com.koushikdutta.async.http.AsyncHttpClient;
 import com.koushikdutta.async.http.AsyncHttpPost;
 import com.koushikdutta.async.http.AsyncHttpResponse;
 import com.koushikdutta.async.http.body.MultipartFormDataBody;
-import com.squareup.picasso.Picasso;
+
 
 import java.io.File;
 import java.nio.file.Path;
@@ -68,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
     ImageButton btnVideo, btnGallery, btn_load;
     VideoView videoView;
+    ImageView imageView;
     TextView textView;
     Button btnCompr;
 
@@ -89,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
         btnCompr = (Button) findViewById(R.id.btnCompr);
         btnGallery = (ImageButton) findViewById(R.id.btnGallery);
         btnVideo = (ImageButton) findViewById(R.id.btnVideo);
+        imageView = (ImageView) findViewById(R.id.imageView);
 
         //Полноэкранный режим
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -262,7 +265,20 @@ public class MainActivity extends AppCompatActivity {
                     url = obj.getString("comics");
                     url = "http://comixify.ai" + url;
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    try {
+                        String err = obj.getString("error_code");
+                        Log.d("................",err);
+                        if(err.equals("too_short_file")) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(MainActivity.this, "Слишком короткое видео", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    } catch (JSONException e1) {
+                        e1.printStackTrace();
+                    }
                 }
                 Log.i("URL»»»»»", url);
                 downloadImg(url);
@@ -299,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
 //                                                android.support.v4.content.FileProvider.getUriForFile(this,getPackageName() + ".provider", file) : Uri.fromFile(file),
 //                                        "image/*").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-
+                        intImg(dirPath, fileName);
                     }
 
                     @Override
@@ -307,5 +323,12 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 });
+    }
+
+    private void intImg (String dirPath, String fileName){
+        Intent intent = new Intent(this, ActivityImg.class);
+        intent.putExtra("dirPath", dirPath);
+        intent.putExtra("fileName", fileName);
+        startActivity(intent);
     }
 }
