@@ -2,19 +2,17 @@ package com.example.alex.comicscamtest;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -32,20 +30,10 @@ import com.koushikdutta.async.http.body.MultipartFormDataBody;
 
 
 import java.io.File;
-import java.nio.file.Path;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Objects;
 import org.json.*;
-import java.util.concurrent.TimeUnit;
-
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.OkHttpClient;
-import okhttp3.RequestBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -58,7 +46,11 @@ public class MainActivity extends AppCompatActivity {
 
     File file;
     String dirPath, fileName;
-    int counterImg = 0;
+
+    //Названия комиксов
+    public int counterImg = 0;
+    public String strCounterImg = "1";
+    public SharedPreferences sPref;
 
     private static final String TAG = "UpVideo";
     private static final String TAG2 = "Compress";
@@ -82,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //loadCntrImg();
+
         AndroidNetworking.initialize(getApplicationContext());
         dirPath = Environment.getExternalStorageDirectory() + "/ComicsImage";
 
@@ -104,6 +98,12 @@ public class MainActivity extends AppCompatActivity {
 
         permissionCheck();
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //loadCntrImg();
     }
 
     public void permissionCheck(){
@@ -287,8 +287,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void downloadImg(String url){
-        counterImg = counterImg++;
-        fileName = "image"+ counterImg + ".jpeg";
+
+        //Второй способ названия комикаса (ERROR)
+        //counterImg = counterImg++;
+        //saveCntrImg();
+
+        DateFormat();
+        fileName = "Comics" + strCounterImg + ".jpeg";
         file = new File(dirPath, fileName);
 
         AndroidNetworking.download(url, dirPath, fileName)
@@ -298,23 +303,6 @@ public class MainActivity extends AppCompatActivity {
                     public void onDownloadComplete() {
 
                         Toast.makeText(MainActivity.this, "DownLoad Complete", Toast.LENGTH_SHORT).show();
-
-
-//                        Intent intent = new Intent();
-//                        intent.setAction(android.content.Intent.ACTION_VIEW);
-//                        Uri uri =Uri.parse("file://" + dirPath + "/" + fileName);
-//                        String type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-//                                MimeTypeMap.getFileExtensionFromUrl(uri.toString()));
-//                        intent.setDataAndType(uri, type == null ? "*/*" : type);
-//                        startActivity((Intent.createChooser(intent,
-//                                "Открыть с помощью")));
-
-//                        File file = ...;
-//                        final Intent intent = new Intent(Intent.ACTION_VIEW)//
-//                                .setDataAndType(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ?
-//                                                android.support.v4.content.FileProvider.getUriForFile(this,getPackageName() + ".provider", file) : Uri.fromFile(file),
-//                                        "image/*").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
                         intImg(dirPath, fileName);
                     }
 
@@ -330,5 +318,25 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("dirPath", dirPath);
         intent.putExtra("fileName", fileName);
         startActivity(intent);
+    }
+
+
+    //Второй способ названия комикаса (ERROR)
+    private void loadCntrImg(){
+        sPref = getPreferences(MODE_PRIVATE);
+        counterImg = sPref.getInt("counterImg", 0);
+    }
+    private void saveCntrImg(){
+        sPref = getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor editor = sPref.edit();
+        editor.putInt("counterImg", counterImg);
+        editor.apply();
+    }
+
+    private void DateFormat(){
+        Date dateNow = new Date();
+        SimpleDateFormat formatForDateNow = new SimpleDateFormat("yy.MM.dd_HH.mm.ss");
+
+        strCounterImg = formatForDateNow.format(dateNow);
     }
 }
