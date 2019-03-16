@@ -7,10 +7,11 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.ImageView;
 
+import com.github.chrisbanes.photoview.PhotoView;
+import com.github.chrisbanes.photoview.PhotoViewAttacher;
+
 public class ActivityImg extends AppCompatActivity {
-
-    ImageView imageView2;
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,13 +22,12 @@ public class ActivityImg extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         setTitle("Comics");
 
-        imageView2 = (ImageView) findViewById(R.id.imageView2);
-
         Bundle arguments = getIntent().getExtras();
         String dirPath = arguments.get("dirPath").toString();
         String fileName = arguments.get("fileName").toString();
 
-        imageView2.setImageURI(Uri.parse("file://" + dirPath + "/" + fileName));
+        PhotoView photoView = (PhotoView) findViewById(R.id.photo_view);
+        photoView.setImageURI(Uri.parse("file://" + dirPath + "/" + fileName));
     }
 
     @Override
