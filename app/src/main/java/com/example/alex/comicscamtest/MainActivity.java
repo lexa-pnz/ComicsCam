@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -14,6 +15,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -55,9 +57,11 @@ public class MainActivity extends AppCompatActivity{
 
     static private ProgressDialog progressDialog = null;
 
+    public SharedPreferences sPref;
+    private boolean checkFirstPlay = false;
+
     ImageButton btnVideo, btnGallery;
     VideoView videoView;
-    TextView textView;
     Button btnUpload;
 
 
@@ -67,6 +71,8 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
 
         AndroidNetworking.initialize(getApplicationContext());
+
+        loadInfoInFirstPlay();
 
         videoView = (VideoView) findViewById(R.id.videoView);
         btnUpload = (Button) findViewById(R.id.btnUpload);
@@ -81,12 +87,15 @@ public class MainActivity extends AppCompatActivity{
         setTitle("ComicsCam");
 
         permissionCheck();
+
+        if (!checkFirstPlay)
+            HelloDialog();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
+        loadInfoInFirstPlay();
     }
 
     public void permissionCheck(){
@@ -247,6 +256,41 @@ public class MainActivity extends AppCompatActivity{
             progressDialog.dismiss();
             progressDialog = null;
         }
+    }
+
+    private void HelloDialog(){
+        checkFirstPlay = true;
+        saveInfoInFirstPlay();
+
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setMessage("Комикс создается с помощью нейросети. " +
+                "Обработка видео может занять продолжительное время, " +
+                "пожалуйста не закрывайте приложение во время обработки. \n\n" +
+                "10c видео = 30c обработки")
+                .setCancelable(false)
+
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+        AlertDialog alert = alertDialog.create();
+        alert.setTitle("INFO");
+        alert.show();
+    }
+
+    private void saveInfoInFirstPlay() {
+        sPref = getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor editor = sPref.edit();
+        editor.putBoolean("FirstPlay", checkFirstPlay);
+        editor.apply();
+    }
+
+    private void loadInfoInFirstPlay() {
+        sPref = getPreferences(MODE_PRIVATE);
+        checkFirstPlay = sPref.getBoolean("FirstPlay", false);
     }
 
 }

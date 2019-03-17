@@ -1,8 +1,10 @@
 package com.example.alex.comicscamtest;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Environment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -24,7 +26,7 @@ public class DownloadComics {
     }
 
     public void downloadImg(String url){
-        //MainActivity.showProgress(mContext, "Загрузка");
+        MainActivity.showProgress(mContext, "Загрузка");
 
         DateFormat();
         fileName = "Comics" + strCounterImg + ".jpeg";
@@ -37,7 +39,7 @@ public class DownloadComics {
                 .startDownload(new DownloadListener() {
                     @Override
                     public void onDownloadComplete() {
-                        //MainActivity.hideProgress();
+                        MainActivity.hideProgress();
 
                         Log.i("information", "DownLoad Complete");
                         Toast.makeText(mContext, "DownLoad Complete", Toast.LENGTH_SHORT).show();
