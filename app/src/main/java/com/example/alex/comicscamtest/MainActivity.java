@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -153,13 +155,22 @@ public class MainActivity extends AppCompatActivity{
 
             case R.id.btnUpload:
 
+                boolean checkInternet = isOnline();
+
                 if (selectedImagePath == null)
                     Toast.makeText(this, "Выберите видео", Toast.LENGTH_SHORT).show();
+                else if (!checkInternet)
+                    Toast.makeText(this, "Необходим интернет", Toast.LENGTH_SHORT).show();
                 else
                     videoCompess();
-
-                break;
         }
+    }
+
+    public boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
     private void videoCompess (){
