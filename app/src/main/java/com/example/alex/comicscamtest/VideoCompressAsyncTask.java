@@ -1,14 +1,21 @@
 package com.example.alex.comicscamtest;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.DownloadListener;
 import com.iceteck.silicompressorr.SiliCompressor;
 
 import java.io.File;
 import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 
@@ -59,8 +66,14 @@ class VideoCompressAsyncTask extends AsyncTask<String, String, String> {
 
             String text = String.format(Locale.US, "%s\nName: %s\nSize: %s", "Успешное сжатие", imageFile.getName(), value);
 
+            //MainActivity.videoStorage = compressedFilePath;
+
             Toast.makeText(mContext, text, Toast.LENGTH_LONG).show();
             Log.i("Silicompressor", "Path: "+compressedFilePath);
             Log.i("Silicompressor", text);
+
+
+            UploadVideo uploadVideo = new UploadVideo(mContext);
+            uploadVideo.videoUpload(compressedFilePath);
         }
 }
