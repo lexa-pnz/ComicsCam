@@ -13,6 +13,7 @@ import com.androidnetworking.interfaces.DownloadListener;
 import com.iceteck.silicompressorr.SiliCompressor;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -33,14 +34,13 @@ class VideoCompressAsyncTask extends AsyncTask<String, String, String> {
         protected void onPreExecute() {
             super.onPreExecute();
 
-            MainActivity.showProgress(mContext, "Сжатие");
-
-            Toast.makeText(mContext, "Компрессия", Toast.LENGTH_LONG).show();
+            MainActivity.showProgress(mContext, "Сжатие видео");
+            //Toast.makeText(mContext, "Компрессия", Toast.LENGTH_LONG).show();
         }
 
     //Работа в фоновом режиме (Компрессия)
     @Override
-    protected String doInBackground(String... paths) {
+    protected String doInBackground(String... paths){
 
         String filePath = null;
         try {
@@ -70,7 +70,7 @@ class VideoCompressAsyncTask extends AsyncTask<String, String, String> {
             String text = String.format(Locale.US, "%s\nName: %s\nSize: %s", "Успешное сжатие", imageFile.getName(), value);
 
 
-            Toast.makeText(mContext, text, Toast.LENGTH_LONG).show();
+            //Toast.makeText(mContext, text, Toast.LENGTH_LONG).show();
             Log.i("Silicompressor", "Path: "+compressedFilePath);
             Log.i("Silicompressor", text);
 

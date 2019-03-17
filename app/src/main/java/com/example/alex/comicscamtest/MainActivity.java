@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity{
     private final int Pick_image = 1;
     private static final int REQUEST_ID_READ_WRITE_PERMISSION = 99;
     private Uri uri;
-    String selectedImagePath;
+    String selectedImagePath = null;
 
     private static final String TAG = "UpVideo";
     private static final String TAG2 = "Compress";
@@ -152,7 +152,11 @@ public class MainActivity extends AppCompatActivity{
                 break;
 
             case R.id.btnUpload:
-                videoCompess();
+
+                if (selectedImagePath == null)
+                    Toast.makeText(this, "Выберите видео", Toast.LENGTH_SHORT).show();
+                else
+                    videoCompess();
 
                 break;
         }
@@ -160,15 +164,16 @@ public class MainActivity extends AppCompatActivity{
 
     private void videoCompess (){
         Log.i("information", "Сжатие видео началось");
+
         // Директория сохранения сжатого файла
         File direct = new File(Environment.getExternalStorageDirectory().getAbsolutePath()
                 + "/ComicsCam");
         if (!direct.exists()) direct.mkdirs();
 
-
         //Сжатие файла
         //Видео из instagram обрабатываются некорректно.
         //( Меняют ориентацию экрана )
+
         new VideoCompressAsyncTask(this).execute(selectedImagePath, direct.getPath());
     }
 
