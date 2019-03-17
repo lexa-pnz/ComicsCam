@@ -26,6 +26,7 @@ public class UploadVideo {
     }
 
     public void videoUpload(String videoStorage){
+
         Log.i("information", "Загрузка видео началась");
         Log.i("information", "Storage file: " + videoStorage);
         //RealPathFromURI realPathFromURI = new RealPathFromURI(MainActivity.this);
@@ -33,6 +34,7 @@ public class UploadVideo {
         //Log.d(TAG, "Recorded Video Path: " + selectedImagePath);
 
         try {
+            MainActivity.showProgress(mContext, "Обработка");
             uploadVideoToServer(videoStorage);
         }
         catch (Exception e){
@@ -66,6 +68,8 @@ public class UploadVideo {
                     url = "http://comixify.ai" + url;
 
                     Log.i("information","URL»»»»»" + url);
+
+                    MainActivity.hideProgress();
 
                     DownloadComics downloadComics = new DownloadComics(mContext);
                     downloadComics.downloadImg(url);

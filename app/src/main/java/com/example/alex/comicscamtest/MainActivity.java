@@ -2,6 +2,7 @@ package com.example.alex.comicscamtest;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,6 +20,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -49,10 +51,13 @@ public class MainActivity extends AppCompatActivity{
     private static final String TAG = "UpVideo";
     private static final String TAG2 = "Compress";
 
+    static private ProgressDialog progressDialog = null;
+
     ImageButton btnVideo, btnGallery;
     VideoView videoView;
     TextView textView;
     Button btnUpload;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -205,4 +210,27 @@ public class MainActivity extends AppCompatActivity{
         btnGallery.setImageResource(R.drawable.gallery_icon);
         btnVideo.setImageResource(R.drawable.camera_icon);
     }
+
+    static protected void showProgress(Context context, String text) {
+
+        if (progressDialog == null) {
+            try {
+                progressDialog = ProgressDialog.show(context, "", text);
+                progressDialog.setCancelable(false);
+            } catch (Exception e) {
+
+            }
+
+        }
+
+    }
+
+    static public void hideProgress() {
+
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
+    }
+
 }

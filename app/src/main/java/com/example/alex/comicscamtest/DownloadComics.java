@@ -24,6 +24,7 @@ public class DownloadComics {
     }
 
     public void downloadImg(String url){
+        //MainActivity.showProgress(mContext, "Загрузка");
 
         DateFormat();
         fileName = "Comics" + strCounterImg + ".jpeg";
@@ -36,6 +37,7 @@ public class DownloadComics {
                 .startDownload(new DownloadListener() {
                     @Override
                     public void onDownloadComplete() {
+                        //MainActivity.hideProgress();
 
                         Log.i("information", "DownLoad Complete");
                         Toast.makeText(mContext, "DownLoad Complete", Toast.LENGTH_SHORT).show();
@@ -63,7 +65,6 @@ public class DownloadComics {
     private void DateFormat(){
         Date dateNow = new Date();
         SimpleDateFormat formatForDateNow = new SimpleDateFormat("_yyMMdd_HHmmss");
-
         strCounterImg = formatForDateNow.format(dateNow);
     }
 }

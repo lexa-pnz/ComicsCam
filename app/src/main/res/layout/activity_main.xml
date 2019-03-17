@@ -19,7 +19,7 @@
             android:layout_height="60dp"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="25dp"
+            android:layout_marginBottom="20dp"
             android:onClick="buttonClick"
             android:text="Upload"
             android:textSize="18sp"
