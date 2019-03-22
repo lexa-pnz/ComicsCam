@@ -12,6 +12,7 @@ import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.error.ANError;
 import com.androidnetworking.interfaces.DownloadListener;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -26,7 +27,7 @@ public class DownloadComics {
     }
 
     public void downloadImg(String url){
-        MainActivity.showProgress(mContext, "Загрузка");
+        ProgressDialog.showProgress(mContext, "Загрузка");
 
         DateFormat();
         fileName = "Comics" + strCounterImg + ".jpeg";
@@ -39,12 +40,11 @@ public class DownloadComics {
                 .startDownload(new DownloadListener() {
                     @Override
                     public void onDownloadComplete() {
-                        MainActivity.hideProgress();
+                        ProgressDialog.hideProgress();
 
                         Log.i("information", "DownLoad Complete");
-                        Toast.makeText(mContext, "DownLoad Complete", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(mContext, "DownLoad Complete", Toast.LENGTH_SHORT).show();
                         intImg(dirPath, fileName);
-
                     }
 
                     @Override

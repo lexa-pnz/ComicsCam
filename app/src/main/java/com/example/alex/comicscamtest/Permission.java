@@ -1,13 +1,15 @@
 package com.example.alex.comicscamtest;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 import android.widget.Toast;
 
-/*public class Permission {
+public class Permission {
 
     Context mContext;
     private static final int REQUEST_ID_READ_WRITE_PERMISSION = 99;
@@ -27,38 +29,37 @@ import android.widget.Toast;
 
             if (writePermission != PackageManager.PERMISSION_GRANTED ||
                     readPermission != PackageManager.PERMISSION_GRANTED) {
-                // If don't have permission so prompt the user.
 
-                mContext.requestPermissions(
+                ActivityCompat.requestPermissions((Activity) mContext,
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
                                 Manifest.permission.READ_EXTERNAL_STORAGE},
-                        REQUEST_ID_READ_WRITE_PERMISSION
+                                REQUEST_ID_READ_WRITE_PERMISSION
                 );
             }
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+
+    public void onRequestPermResult(int requestCode, String permissions[], int[] grantResults) {
 
         switch (requestCode) {
             case REQUEST_ID_READ_WRITE_PERMISSION: {
 
-                // Note: If request is cancelled, the result arrays are empty.
-                // Permissions granted (read/write).
                 if (grantResults.length > 1
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED
                         && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
 
-                    Toast.makeText(mContext, "Permission granted!", Toast.LENGTH_LONG).show();
+                    Log.i("information", "Permission granted!");
 
                 }
-                // Cancelled or denied.
                 else {
-                    Toast.makeText(mContext, "Permission denied!", Toast.LENGTH_LONG).show();
+                    Log.i("information", "Permission denied!");
+
+                    PermissionDialog permissionDialog = new PermissionDialog(mContext);
+                    permissionDialog.dialog();
                 }
                 break;
             }
         }
     }
-}*/
+}

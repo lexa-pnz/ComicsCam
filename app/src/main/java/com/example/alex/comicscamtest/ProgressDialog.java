@@ -1,27 +1,29 @@
 package com.example.alex.comicscamtest;
 
 import android.content.Context;
+import android.util.Log;
 
 public class ProgressDialog extends MainActivity {
 
-//    static Context mContext;
-//    static private String mTxt;
-//
-//    public ProgressDialog(Context context, String txt){
-//        mContext = context;
-//        mTxt = txt;
-//    }
+    static private android.app.ProgressDialog progressDialog = null;
 
-//    static public void dialogOn(Context context, String txt){
-//        MainActivity mainActivity = new MainActivity();
-//
-//
-//            mainActivity.showProgress(context, txt);
-//
-//    }
+    static public void showProgress(Context context, String text) {
 
-//    static public void dialogOff(){
-//        MainActivity mainActivity = new MainActivity();
-//        mainActivity.hideProgress();
-//    }
+        if (progressDialog == null) {
+            try {
+                progressDialog = android.app.ProgressDialog.show(context, "", text);
+                progressDialog.setCancelable(false);
+            } catch (Exception e) {
+                Log.i("myERR", String.valueOf(e));
+            }
+        }
+    }
+
+    static public void hideProgress() {
+
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
+    }
 }

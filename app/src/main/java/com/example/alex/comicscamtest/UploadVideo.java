@@ -19,6 +19,7 @@ import java.io.File;
 public class UploadVideo {
     Context mContext;
     private String url;
+    String mVideoStorage;
 
 
     public UploadVideo(Context context){
@@ -29,12 +30,10 @@ public class UploadVideo {
 
         Log.i("information", "Загрузка видео началась");
         Log.i("information", "Storage file: " + videoStorage);
-        //RealPathFromURI realPathFromURI = new RealPathFromURI(MainActivity.this);
-        //selectedImagePath = realPathFromURI.getRealPathFromURI(uri);
-        //Log.d(TAG, "Recorded Video Path: " + selectedImagePath);
 
         try {
-            MainActivity.showProgress(mContext, "Обработка");
+            mVideoStorage = videoStorage;
+            ProgressDialog.showProgress(mContext, "Обработка");
             uploadVideoToServer(videoStorage);
         }
         catch (Exception e){
@@ -69,10 +68,12 @@ public class UploadVideo {
 
                     Log.i("information","URL»»»»»" + url);
 
-                    MainActivity.hideProgress();
+                    ProgressDialog.hideProgress();
 
                     DownloadComics downloadComics = new DownloadComics(mContext);
                     downloadComics.downloadImg(url);
+
+                    deleteCompressFile();
 
                 } catch (JSONException e) {
                     try {
@@ -84,6 +85,8 @@ public class UploadVideo {
                                 @Override
                                 public void run() {
                                     Toast.makeText(mContext, "Слишком короткое видео", Toast.LENGTH_SHORT).show();
+                                    ProgressDialog.hideProgress();
+                                    deleteCompressFile();
                                 }
                             });
                         }
@@ -93,5 +96,11 @@ public class UploadVideo {
                 }
             }
         });
+    }
+
+    private void deleteCompressFile(){
+        File file = new File(mVideoStorage);
+        boolean checkDelete = file.delete();
+        Log.i("information","Delete Video ? " + checkDelete);
     }
 }

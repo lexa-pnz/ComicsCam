@@ -25,6 +25,7 @@ class VideoCompressAsyncTask extends AsyncTask<String, String, String> {
     Context mContext;
 
 
+
     public VideoCompressAsyncTask(Context context){
         mContext = context;
     }
@@ -34,7 +35,7 @@ class VideoCompressAsyncTask extends AsyncTask<String, String, String> {
         protected void onPreExecute() {
             super.onPreExecute();
 
-            MainActivity.showProgress(mContext, "Сжатие видео");
+            ProgressDialog.showProgress(mContext, "Сжатие видео");
             //Toast.makeText(mContext, "Компрессия", Toast.LENGTH_LONG).show();
         }
 
@@ -73,9 +74,9 @@ class VideoCompressAsyncTask extends AsyncTask<String, String, String> {
             //Toast.makeText(mContext, text, Toast.LENGTH_LONG).show();
             Log.i("Silicompressor", "Path: "+compressedFilePath);
             Log.i("Silicompressor", text);
+            Log.i("information", text);
 
-            MainActivity.hideProgress();
-
+            ProgressDialog.hideProgress();
 
             UploadVideo uploadVideo = new UploadVideo(mContext);
             uploadVideo.videoUpload(compressedFilePath);
