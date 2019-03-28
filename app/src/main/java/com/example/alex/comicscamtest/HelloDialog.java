@@ -2,7 +2,6 @@ package com.example.alex.comicscamtest;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.support.v7.app.AlertDialog;
 
 
@@ -11,11 +10,6 @@ import android.support.v7.app.AlertDialog;
 public class HelloDialog extends MainActivity{
 
     Context mContext;
-
-//    public SharedPreferences sPref;
-//    public boolean checkFirstPlay = false;
-
-    //MainActivity myMainActivity = new MainActivity();
 
     public HelloDialog(Context context){
         mContext = context;
@@ -41,21 +35,4 @@ public class HelloDialog extends MainActivity{
         alert.setTitle("INFO");
         alert.show();
     }
-
-//    private void saveInfoInFirstPlay() {
-//        //sPref = getPreferences();
-//
-//        sPref = myMainActivity.getPref();
-//        SharedPreferences.Editor editor = sPref.edit();
-//        editor.putBoolean("FirstPlay", checkFirstPlay);
-//        editor.apply();
-//    }
-//
-//
-//    private void loadInfoInFirstPlay() {
-//        //sPref = getPreferences();
-//
-//        sPref = myMainActivity.getPref();
-//        checkFirstPlay = sPref.getBoolean("FirstPlay", false);
-//    }
 }

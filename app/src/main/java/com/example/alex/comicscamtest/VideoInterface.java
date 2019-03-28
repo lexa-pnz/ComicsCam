@@ -9,7 +9,6 @@ import retrofit2.http.Part;
 public interface VideoInterface {
     @Multipart
 
-    @POST("/comixify/") //Путь ?
-    //@POST("http://comixify.ai/comixify/") //Путь ?
+    @POST("/comixify/")
     Call<ResultObject> uploadVideoToServer(@Part MultipartBody.Part video);
 }

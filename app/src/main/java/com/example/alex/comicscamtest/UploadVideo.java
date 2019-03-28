@@ -54,6 +54,7 @@ public class UploadVideo {
                     return;
                 }
                 Log.i("Response»»»»»","Server says: " + result);
+                Log.i("information","Server says: " + result);
 
                 JSONObject obj = null;
                 try {

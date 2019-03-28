@@ -1,22 +1,12 @@
 package com.example.alex.comicscamtest;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.util.Log;
-import android.widget.Toast;
-
-import com.androidnetworking.AndroidNetworking;
-import com.androidnetworking.error.ANError;
-import com.androidnetworking.interfaces.DownloadListener;
 import com.iceteck.silicompressorr.SiliCompressor;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URISyntaxException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Locale;
 
 
